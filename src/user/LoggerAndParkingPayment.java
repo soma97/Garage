@@ -74,9 +74,8 @@ public class LoggerAndParkingPayment {
     
     public static void setErrorLog(Exception exception)
     {
-        exception.printStackTrace();
-//        StackTraceElement elements[] = exception.getStackTrace();
-//	for (StackTraceElement element:elements) 
-//            LOGGER.log(Level.WARNING, element.toString());
+        StackTraceElement elements[] = exception.getStackTrace();
+	for (StackTraceElement element:elements) 
+            LOGGER.log(Level.WARNING, element.toString());
     }
 }
