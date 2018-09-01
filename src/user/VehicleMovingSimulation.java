@@ -174,12 +174,12 @@ public class VehicleMovingSimulation extends Thread {
                         && (UserProgram.platformSimulation.getTraversePlatform(platformNumber).matrix[node.i][node.j + locationArray[i]].toExitPlatform != null || UserProgram.platformSimulation.getTraversePlatform(platformNumber).matrix[node.i][node.j + locationArray[i]].toFindParking != null || UserProgram.platformSimulation.getTraversePlatform(platformNumber).matrix[node.i][node.j + locationArray[i]].toNextPlatform != null)) {
 
                     if (Garage.getPlatform(platformNumber).matrix[node.i][node.j + locationArray[i]].isFree == false) {
-                        if (node.label.getText().contains("R") && crashSite!=null) {
+                        if (node.label.getText().contains("R") && crashSite!=null && UserProgram.platformSimulation.getTraversePlatform(platformNumber).matrix[node.i][node.j + locationArray[i]].leftLane.label.getText().contains("V")==false) {
                             moveVehicle(platformNumber, platformNumber, node, UserProgram.platformSimulation.getTraversePlatform(platformNumber).matrix[node.i][node.j + locationArray[i]].leftLane);
                             node = UserProgram.platformSimulation.getTraversePlatform(platformNumber).matrix[node.i][node.j + locationArray[i]].leftLane;
                             isInLeftLane = true;
                             return true;
-                        } else if (new Random().nextInt(10) == 0) {
+                        } else if (new Random().nextInt(10) == 0 && node.label.getText().contains("R")==false) {
                             vehicleCrash(Garage.getPlatform(platformNumber).matrix[node.i][node.j].vehicle, Garage.getPlatform(platformNumber).matrix[node.i][node.j + locationArray[i]].vehicle, node, UserProgram.platformSimulation.getTraversePlatform(platformNumber).matrix[node.i][node.j + locationArray[i]]);
                             UserProgram.threads.remove(this);
                             return false;
