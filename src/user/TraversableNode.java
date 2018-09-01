@@ -10,7 +10,6 @@ public class TraversableNode{
     Label label;
     TraversableNode toExitPlatform,toFindParking,toNextPlatform,leftLane;
     
-    
     public TraversableNode(String type,int i,int j)
     {
         this.i=i;

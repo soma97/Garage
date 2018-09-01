@@ -61,8 +61,8 @@ public class LoggerAndParkingPayment {
         hours+=24*(now.getDayOfMonth()-entryDate.get(vehicle.licensePlate).getDayOfMonth());
         hours+=now.getHour()-entryDate.get(vehicle.licensePlate).getHour();
         
-        if(hours<=1) toPay=1;
-        else if(hours<=3) toPay=2;
+        if(hours<1) toPay=1;
+        else if(hours<3) toPay=2;
         else toPay=8;
         
         entryDate.remove(vehicle.licensePlate);
@@ -74,8 +74,9 @@ public class LoggerAndParkingPayment {
     
     public static void setErrorLog(Exception exception)
     {
-        StackTraceElement elements[] = exception.getStackTrace();
-	for (StackTraceElement element:elements) 
-            LOGGER.log(Level.WARNING, element.toString());
+        exception.printStackTrace();
+//        StackTraceElement elements[] = exception.getStackTrace();
+//	for (StackTraceElement element:elements) 
+//            LOGGER.log(Level.WARNING, element.toString());
     }
 }

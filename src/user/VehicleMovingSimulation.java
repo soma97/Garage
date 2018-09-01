@@ -17,12 +17,14 @@ public class VehicleMovingSimulation extends Thread {
     CrashSite crashSite;
     boolean isInLeftLane;
     int suspectWait;
+    boolean isInterrupted;
 
     VehicleMovingSimulation(boolean findingParking, int platformNumber, TraversableNode node) {
         this.findingParking = findingParking;
         this.platformNumber = platformNumber;
         this.node = node;
         suspectWait=0;
+        isInterrupted=false;
     }
 
     @Override
@@ -40,7 +42,7 @@ public class VehicleMovingSimulation extends Thread {
         }
 
         while (crashSite == null) {
-            if (Thread.currentThread().isInterrupted()) {
+            if (isInterrupted) {
                 UserProgram.threads.remove(this);
                 return;
             }
@@ -198,8 +200,8 @@ public class VehicleMovingSimulation extends Thread {
         if (UserProgram.stopTraffic.contains(platformNumber) && node.label.getText().contains("R") == false) {
             return true;
         }
-        if(Thread.currentThread().isInterrupted())
-                        return false;
+        if(this.isInterrupted)
+            return true;
         
         if (node.toExitPlatform != null) {
             if (UserProgram.platformSimulation.getTraversePlatform(platformNumber).toLeft == node.toExitPlatform && platformNumber != 1) {
@@ -344,7 +346,6 @@ public class VehicleMovingSimulation extends Thread {
     }
 
     public synchronized void vehicleCrash(Vehicle vehicle1, Vehicle vehicle2, TraversableNode node, TraversableNode node2) {
-        
         CrashSite crash = new CrashSite(node.i, node.j, platformNumber);
         UserProgram.crashes.add(crash);
         UserProgram.stopTraffic.add(platformNumber);
@@ -352,7 +353,7 @@ public class VehicleMovingSimulation extends Thread {
 
         for (VehicleMovingSimulation x : UserProgram.threads) {
             if (x.node == node2) {
-                x.interrupt();
+                x.isInterrupted=true;
                 break;
             }
         }
@@ -416,8 +417,9 @@ public class VehicleMovingSimulation extends Thread {
         if (UserProgram.stopTraffic.contains(platformNumber)) {
             UserProgram.stopTraffic.remove(UserProgram.stopTraffic.indexOf(platformNumber));
         }
+        if(UserProgram.crashes.contains(crash))
+            UserProgram.crashes.remove(crash);
         
-        UserProgram.crashes.remove(this.crashSite);
         if (UserProgram.crashes.isEmpty()) {
             UserProgram.stopTraffic.clear();
         }
@@ -434,9 +436,18 @@ public class VehicleMovingSimulation extends Thread {
         UserProgram.stopTraffic.add(platformNumber);
 
         exitPlatform();
-
+        int onTheSamePosition=0;
+        int iOld=node.i,jOld=node.j;
+        
         while (true) {
 
+            if(node.i==iOld && node.j==jOld)
+                onTheSamePosition++;
+            else onTheSamePosition=0;
+            iOld=node.i;jOld=node.j;
+            if(onTheSamePosition>15)
+                break;
+            
             if (platform < platformNumber) {
                 exitPlatformWithRotation();
             } else if (platform > platformNumber) {
@@ -447,7 +458,7 @@ public class VehicleMovingSimulation extends Thread {
                 if (Math.abs(node.i - crashSite.i) <= 3 && Math.abs(node.j - crashSite.j) <= 3) {
                     break;
                 }
-
+                
                 TraversableNode currentNode = null;
                 
                 if (isInLeftLane) {
