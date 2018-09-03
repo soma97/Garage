@@ -346,7 +346,6 @@ public class VehicleMovingSimulation extends Thread {
     }
 
     public void vehicleCrash(Vehicle vehicle1, Vehicle vehicle2, TraversableNode node, TraversableNode node2) {
-        System.out.println("JA SAM SE SUDARIO: "+Thread.currentThread().getName());
         UserProgram.platformSimulation.getTraversePlatform(platformNumber).accidentHappened=true;
         CrashSite crash = new CrashSite(node.i, node.j, platformNumber);
         UserProgram.crashes.add(crash);
@@ -355,7 +354,6 @@ public class VehicleMovingSimulation extends Thread {
 
         for (VehicleMovingSimulation x : UserProgram.threads) {
             if (x.node == node2) {
-                System.out.println("SA "+x.getName());
                 x.isInterrupted=true;
                 break;
             }
