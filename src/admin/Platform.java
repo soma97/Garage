@@ -1,4 +1,7 @@
 package admin;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import user.*;
 import vehicles.*;
 
@@ -11,6 +14,23 @@ public class Platform implements Serializable
     public PlatformPlace[][] matrix=new PlatformPlace[10][8]; 
     public int number;
     public int freeSpace;
+    public transient Object lock=new Object();
+    public static final long serialVersionUID = -5952661615696078692L;
+    
+    
+	private void writeObject(ObjectOutputStream out) throws IOException {
+		out.writeObject(matrix);
+                out.writeObject(number);
+                out.writeObject(freeSpace);
+	}
+
+	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+		matrix=(PlatformPlace[][])in.readObject();
+                number=(int)in.readObject();
+                freeSpace=(int)in.readObject();
+                if(lock==null) lock=new Object();
+        }
+
     public Platform()
     {
         freeSpace=28;

@@ -6,9 +6,11 @@ public class Traverse {
     public int traversePlatformNumber;
     TraversableNode toLeft,toRight;
     public final Object blockTraffic=new Object(); //sluzi za blokadu saobracaja na platformi u slucaju sudara
+    boolean accidentHappened;
     
     Traverse(int platform)
     {
+        accidentHappened=false;
         traversePlatformNumber=platform;
         updateTraversableNodes(platform);
     }

@@ -52,9 +52,14 @@ public class LoggerAndParkingPayment {
     
     public static void setParkingPayment(Vehicle vehicle) throws Exception
     {
+        try{
         if(vehicle.type.contains("Policijski") || vehicle.type.contains("Sanitetski") || vehicle.type.contains("Vatrogasni") || vehicle.licensePlate==null)
             return;
-        
+        }
+        catch(Exception e){
+            System.out.println("JA SAM NULL: "+vehicle);
+            System.out.println("A JA SAM: "+Thread.currentThread().getName());
+        }
         LocalDateTime now=LocalDateTime.now();
         int toPay=0;
         int hours=0;
@@ -74,8 +79,9 @@ public class LoggerAndParkingPayment {
     
     public static void setErrorLog(Exception exception)
     {
-        StackTraceElement elements[] = exception.getStackTrace();
-	for (StackTraceElement element:elements) 
-            LOGGER.log(Level.WARNING, element.toString());
+//        StackTraceElement elements[] = exception.getStackTrace();
+//	for (StackTraceElement element:elements) 
+//            LOGGER.log(Level.WARNING, element.toString());
+        exception.printStackTrace();
     }
 }

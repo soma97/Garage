@@ -18,6 +18,8 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.ComboBox;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.util.Properties;
 
 public class GUI extends Application{
@@ -38,27 +40,40 @@ public class GUI extends Application{
         File parent=new File(System.getProperty("user.home")+"/Documents/GarageFiles");
         parent.mkdirs();
         
-        int platforms=-1;
+        int platforms=1;
         Properties properties = new Properties();
         try {
 		InputStream input = new FileInputStream(System.getProperty("user.home")+"/Documents/GarageFiles/config.properties");
                 properties.load(input);
 
 		platforms=Integer.parseInt(properties.getProperty("platforme"));
-	} catch (IOException ex) {LoggerAndParkingPayment.setErrorLog(ex);}
+                if(platforms<1) platforms=1;
+	} catch (IOException ex) {
+            try(OutputStream output=new FileOutputStream(System.getProperty("user.home")+"/Documents/GarageFiles/config.properties"))
+            {
+                properties.setProperty("platforme", "1");
+                properties.store(output,"");
+            }catch(Exception e){LoggerAndParkingPayment.setErrorLog(e);}
+            LoggerAndParkingPayment.setErrorLog(ex);
+        }
+        try{
+            if(Files.notExists(Police.PURSUITVEHICLES.toPath()))
+            Files.createFile(Police.PURSUITVEHICLES.toPath());
+        }catch(Exception e){ LoggerAndParkingPayment.setErrorLog(e); }
         
         adminStage=stage;
         adminStage.setTitle("Garaza");
         Garage.deserialize();
         
-        if(platforms!=-1 && Garage.platforms.isEmpty())
+        if(Garage.platforms.isEmpty())
         {
             for(int i=0;i<platforms;++i)
                 Garage.platforms.add(new Platform());
+        }else if(platforms>Garage.platforms.size())
+        {
+            for(int i=platforms-Garage.platforms.size();i>0;i--)
+                Garage.platforms.add(new Platform());
         }
-        else if(Garage.platforms.isEmpty())
-            Garage.platforms.add(new Platform());
-        //else setPlatformTable(currentPlatform);
         
         adminStage.setScene(AdminScene());
         adminStage.show();

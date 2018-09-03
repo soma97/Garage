@@ -140,19 +140,19 @@ public class VehicleMovingSimulation extends Thread {
         
         suspect.suspectWait=3000+toSuspectWait;
         
-        try (FileOutputStream crashInfo = new FileOutputStream(new File(System.getProperty("user.home") + "/Documents/GarageFiles/suspectInfo" + vehicle.licensePlate))) {
-            crashInfo.write(vehicle.type.getBytes());
-            crashInfo.write(vehicle.getName().getBytes());
-            crashInfo.write(vehicle.licensePlate.getBytes());
-            crashInfo.write(vehicle.getChassisNumber().getBytes());
-            crashInfo.write(vehicle.getEngineNumber().getBytes());
+        try (DataOutputStream crashInfo = new DataOutputStream(new FileOutputStream(System.getProperty("user.home") + "/Documents/GarageFiles/suspectInfo" + vehicle.licensePlate))) {
+            crashInfo.writeChars(vehicle.type);
+            crashInfo.writeChars(vehicle.getName());
+            crashInfo.writeChars(vehicle.licensePlate);
+            crashInfo.writeChars(vehicle.getChassisNumber());
+            crashInfo.writeChars(vehicle.getEngineNumber());
             try(ByteArrayOutputStream byteArray=new ByteArrayOutputStream())
             {
                 Image image=new Image(vehicle.getImage());
                 ImageIO.write(SwingFXUtils.fromFXImage(image, null),"jpg",byteArray);
-                crashInfo.write(byteArray.toByteArray());
+                crashInfo.write(byteArray.toByteArray(),0,byteArray.toByteArray().length);
             }catch(Exception e){ LoggerAndParkingPayment.setErrorLog(e); }
-            crashInfo.write(java.time.LocalDateTime.now().toString().getBytes());
+            crashInfo.writeChars(java.time.LocalDateTime.now().toString());
         } catch (Exception e) { LoggerAndParkingPayment.setErrorLog(e); }
         
         tSleep(2000+toSuspectWait);
@@ -165,7 +165,7 @@ public class VehicleMovingSimulation extends Thread {
         UserProgram.threads.remove(this);
     }
 
-    public synchronized boolean exitPlatform() {
+    public boolean exitPlatform() {
         if (Garage.getPlatform(platformNumber).matrix[node.i][node.j].isParkingPlace == true) {
             tSleep(1000);
             int[] locationArray = new int[]{-2, -1, 1, 2};
@@ -216,9 +216,9 @@ public class VehicleMovingSimulation extends Thread {
                 }
             } else {
                 if (node.i == 1 && node.j == 6 && Garage.getPlatform(platformNumber).matrix[node.toExitPlatform.i][node.toExitPlatform.j].isFree == false) {
-                    if (new Random().nextInt(10) == 0 && node.label.getText().contains("R") == false && node.label.getText().contains("S")==false) {
+                    if (new Random().nextInt(10) == 0 && node.label.getText().contains("R") == false && node.label.getText().contains("S")==false && UserProgram.platformSimulation.getTraversePlatform(platformNumber).accidentHappened==false) {
                         vehicleCrash(Garage.getPlatform(platformNumber).matrix[node.i][node.j].vehicle, Garage.getPlatform(platformNumber).matrix[node.toExitPlatform.i][node.toExitPlatform.j].vehicle, node, UserProgram.platformSimulation.getTraversePlatform(platformNumber).matrix[node.toExitPlatform.i][node.toExitPlatform.j]);
-                        return true;
+                        return false;
                     }
                 } else if (Garage.getPlatform(platformNumber).matrix[node.toExitPlatform.i][node.toExitPlatform.j].isFree) {
                     if (node.i == 1 && node.j == 6 && Garage.getPlatform(platformNumber).matrix[0][7].isFree == false) {
@@ -345,7 +345,9 @@ public class VehicleMovingSimulation extends Thread {
         }
     }
 
-    public synchronized void vehicleCrash(Vehicle vehicle1, Vehicle vehicle2, TraversableNode node, TraversableNode node2) {
+    public void vehicleCrash(Vehicle vehicle1, Vehicle vehicle2, TraversableNode node, TraversableNode node2) {
+        System.out.println("JA SAM SE SUDARIO: "+Thread.currentThread().getName());
+        UserProgram.platformSimulation.getTraversePlatform(platformNumber).accidentHappened=true;
         CrashSite crash = new CrashSite(node.i, node.j, platformNumber);
         UserProgram.crashes.add(crash);
         UserProgram.stopTraffic.add(platformNumber);
@@ -353,38 +355,39 @@ public class VehicleMovingSimulation extends Thread {
 
         for (VehicleMovingSimulation x : UserProgram.threads) {
             if (x.node == node2) {
+                System.out.println("SA "+x.getName());
                 x.isInterrupted=true;
                 break;
             }
         }
 
-        try (FileOutputStream crashInfo = new FileOutputStream(new File(System.getProperty("user.home") + "/Documents/GarageFiles/crashInfo" + crash.toString()))) {
+        try (DataOutputStream crashInfo = new DataOutputStream(new FileOutputStream(System.getProperty("user.home") + "/Documents/GarageFiles/crashInfo" + crash.toString()))) {
           
-            crashInfo.write(vehicle1.type.getBytes());
-            crashInfo.write(vehicle1.getName().getBytes());
-            crashInfo.write(vehicle1.licensePlate.getBytes());
-            crashInfo.write(vehicle1.getChassisNumber().getBytes());
-            crashInfo.write(vehicle1.getEngineNumber().getBytes());
+            crashInfo.writeChars(vehicle1.type);
+            crashInfo.writeChars(vehicle1.getName());
+            crashInfo.writeChars(vehicle1.licensePlate);
+            crashInfo.writeChars(vehicle1.getChassisNumber());
+            crashInfo.writeChars(vehicle1.getEngineNumber());
             try(ByteArrayOutputStream byteArray=new ByteArrayOutputStream())
             {
                 Image image=new Image(vehicle1.getImage());
                 ImageIO.write(SwingFXUtils.fromFXImage(image, null),"jpg",byteArray);
-                crashInfo.write(byteArray.toByteArray());
+                crashInfo.write(byteArray.toByteArray(),0,byteArray.toByteArray().length);
             }catch(Exception e){ LoggerAndParkingPayment.setErrorLog(e); }
             
-            crashInfo.write(vehicle2.type.getBytes());
-            crashInfo.write(vehicle2.getName().getBytes());
-            crashInfo.write(vehicle2.licensePlate.getBytes());
-            crashInfo.write(vehicle2.getChassisNumber().getBytes());
-            crashInfo.write(vehicle2.getEngineNumber().getBytes());
+            crashInfo.writeChars(vehicle2.type);
+            crashInfo.writeChars(vehicle2.getName());
+            crashInfo.writeChars(vehicle2.licensePlate);
+            crashInfo.writeChars(vehicle2.getChassisNumber());
+            crashInfo.writeChars(vehicle2.getEngineNumber());
             try(ByteArrayOutputStream byteArray=new ByteArrayOutputStream())
             {
                 Image image=new Image(vehicle2.getImage());
                 ImageIO.write(SwingFXUtils.fromFXImage(image, null),"jpg",byteArray);
-                crashInfo.write(byteArray.toByteArray());
+                crashInfo.write(byteArray.toByteArray(),0,byteArray.toByteArray().length);
             }catch(Exception e){ LoggerAndParkingPayment.setErrorLog(e); }
             
-            crashInfo.write(java.time.LocalDateTime.now().toString().getBytes());
+            crashInfo.writeChars(java.time.LocalDateTime.now().toString());
         } catch (Exception e) { LoggerAndParkingPayment.setErrorLog(e); }
 
         javafx.application.Platform.runLater(() -> {
@@ -445,7 +448,7 @@ public class VehicleMovingSimulation extends Thread {
                 onTheSamePosition++;
             else onTheSamePosition=0;
             iOld=node.i;jOld=node.j;
-            if(onTheSamePosition>15)
+            if(onTheSamePosition>8)
                 break;
             
             if (platform < platformNumber) {
@@ -690,7 +693,7 @@ public class VehicleMovingSimulation extends Thread {
         tSleep(300);
         if (isInLeftLane == false) {
             if (UserProgram.platformSimulation.getTraversePlatform(platformNumber).toLeft == node.toExitPlatform && node.toExitPlatform != null) {
-                if (Garage.getPlatform(platformNumber - 1).matrix[node.toExitPlatform.i][node.toExitPlatform.j].isFree) {
+                if (Garage.getPlatform(platformNumber - 1).matrix[node.toExitPlatform.i][node.toExitPlatform.j].isFree && platformNumber!=1) {
                     moveVehicle(platformNumber, platformNumber - 1, node, node.toExitPlatform);
                     node = node.toExitPlatform;
                     --platformNumber;
@@ -787,8 +790,10 @@ public class VehicleMovingSimulation extends Thread {
         return true;
     }
 
-    public static synchronized void moveVehicle(int platformNumberSource, int platformNumberDest, TraversableNode source, TraversableNode destination) {
+    public static void moveVehicle(int platformNumberSource, int platformNumberDest, TraversableNode source, TraversableNode destination) {
 
+        synchronized(Garage.getPlatform(platformNumberDest).lock)
+        {
         admin.Platform platformSource = Garage.getPlatform(platformNumberSource);
         admin.Platform platformDest = Garage.getPlatform(platformNumberDest);
         Traverse traverseSource = UserProgram.platformSimulation.getTraversePlatform(platformNumberSource);
@@ -816,6 +821,7 @@ public class VehicleMovingSimulation extends Thread {
                         traverseSource.matrix[source.i][source.j].setLabel(" ");
                     }
                 });
+        }
     }
 
     public static void tSleep(int timeInMS) {
