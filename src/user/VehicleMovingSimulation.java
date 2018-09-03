@@ -350,7 +350,6 @@ public class VehicleMovingSimulation extends Thread {
         CrashSite crash = new CrashSite(node.i, node.j, platformNumber);
         UserProgram.crashes.add(crash);
         UserProgram.stopTraffic.add(platformNumber);
-        crash.callEmergencyVehicles();
 
         for (VehicleMovingSimulation x : UserProgram.threads) {
             if (x.node == node2) {
@@ -358,6 +357,13 @@ public class VehicleMovingSimulation extends Thread {
                 break;
             }
         }
+        
+        javafx.application.Platform.runLater(() -> {
+            UserProgram.platformSimulation.getTraversePlatform(platformNumber).matrix[node.i][node.j].label.setText(" X");
+            UserProgram.platformSimulation.getTraversePlatform(platformNumber).matrix[node2.i][node2.j].label.setText(" X");
+        });
+        
+        crash.callEmergencyVehicles();
 
         try (DataOutputStream crashInfo = new DataOutputStream(new FileOutputStream(System.getProperty("user.home") + "/Documents/GarageFiles/crashInfo" + crash.toString()))) {
           
@@ -387,11 +393,6 @@ public class VehicleMovingSimulation extends Thread {
             
             crashInfo.writeChars(java.time.LocalDateTime.now().toString());
         } catch (Exception e) { LoggerAndParkingPayment.setErrorLog(e); }
-
-        javafx.application.Platform.runLater(() -> {
-            UserProgram.platformSimulation.getTraversePlatform(platformNumber).matrix[node.i][node.j].label.setText(" X");
-            UserProgram.platformSimulation.getTraversePlatform(platformNumber).matrix[node2.i][node2.j].label.setText(" X");
-        });
 
         while (crash.numberOfEmergencyVehicles > 0) {
             tSleep(1000);
@@ -510,7 +511,6 @@ public class VehicleMovingSimulation extends Thread {
             UserProgram.stopTraffic.remove(UserProgram.stopTraffic.indexOf(platformNumber));
         }
         crashSite.numberOfEmergencyVehicles--;
-        
         crashSite = null;
         
         while (isInLeftLane) {
@@ -524,6 +524,7 @@ public class VehicleMovingSimulation extends Thread {
                 currentNode = node.leftLane.toFindParking;
             }
             if (currentNode != null) {
+                tSleep(250);
                 if (Garage.getPlatform(platformNumber).matrix[currentNode.i][currentNode.j].isFree && currentNode.label.getText().endsWith(" ")) {
                     moveVehicle(platformNumber, platformNumber, node, currentNode);
                     node = currentNode;

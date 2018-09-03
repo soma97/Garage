@@ -22,6 +22,7 @@ public class CrashSite {
         boolean policeFounded=false,fireTruckFounded=false,ambulanceFounded=false;
         for(int i=0;i<Garage.platforms.size();++i)
         {
+            UserProgram.stopTraffic.add(i);
             if(policeFounded==false && platformNumber+i<=Garage.platforms.size())
                 if(findEmergencyVehicle("P",platformNumber+i))
                     policeFounded=true;
@@ -40,6 +41,7 @@ public class CrashSite {
             if(ambulanceFounded==false && platformNumber-i>0)
                 if(findEmergencyVehicle("H",platformNumber-i))
                     ambulanceFounded=true;
+            UserProgram.stopTraffic.remove(UserProgram.stopTraffic.indexOf(i));
         }
             
     }
